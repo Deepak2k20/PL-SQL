@@ -254,23 +254,7 @@ BEGIN
   ADD_CUSTOMER(12,'JEFF','AFONSO','A",'23 SUWANNEE RD', NULL, 'ALPMARETTA', 'USA', SYSDATE, 'SOUTH');
 END;
 
-or
 
-BEGIN
-  ADD_CUSTOMER
-  (
-  c_region  => 'SOUTH',
-  c_id  => 15,
-  c_fname  => 'JEFF',
-  c_lname  => 'AFONSO',
-  c_mname  => 'A',
-  c_add1  => '23 SUWANNEE RD',
-  c_add2  => NULL,
-  c_city  => 'ALPHARETTA',
-  c_country  => 'USA',
-  c_date_added  => SYSDATE
-  );
-  END;
 
 # Procedure with OUT Mode
 
