@@ -2,6 +2,7 @@
 
 #Syntax
 
+```sql
 DECLARE
 -- variable section
 ordernumber constant number := 1001;
