@@ -162,7 +162,7 @@ BEGIN
 END;
 /
 
-#Anonymous blocks
+# Anonymous blocks
 
 All the blocks we have seen so far are "anonymous" - they have no names.
 
@@ -184,7 +184,7 @@ BEGIN
 END;
 /
 
-#Procedures
+# Procedures
 
 A procedure is a group of PL/SQL statements that you can call by name. It can accepts value as input, process the data and return output if required.
 
@@ -205,7 +205,7 @@ BEGIN
 END;
 /
 
-MODE
+# MODE
 
 MODE is usually one of the following: IN, OUT, IN OUT.
 
@@ -220,7 +220,7 @@ IN
     Keyword usable as MODE that means read or write. If you need to send a variable to a program that it can both read and update, and then have the updated value available to 
     the calling program, use the parameter mode IN OUT.
 
-  #Creating a Procedure
+  # Creating a Procedure
 
   CREATE OR REPLACE PROCEDURE ADD_CUSTOMER
   (
