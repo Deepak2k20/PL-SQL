@@ -244,4 +244,220 @@ IN
     dbms_output.put_line('Data successfully inserted');
   END ADD_CUSTOMER;
   /
+
+# Calling a Procedure
+
+#Method1
+
+BEGIN
+  ADD_CUSTOMER(12,'JEFF','AFONSO','A",'23 SUWANNEE RD', NULL, 'ALPMARETTA', 'USA', SYSDATE, 'SOUTH');
+END;
+
+#Method2
+
+BEGIN
+  ADD_CUSTOMER
+  (
+  c_region  => 'SOUTH',
+  c_id  => 15,
+  c_fname  => 'JEFF',
+  c_lname  => 'AFONSO',
+  c_mname  => 'A',
+  c_add1  => '23 SUWANNEE RD',
+  c_add2  => NULL,
+  c_city  => 'ALPHARETTA',
+  c_country  => 'USA',
+  c_date_added  => SYSDATE
+  );
+  END;
+
+# Procedure with OUT Mode
+
+CREATE OR REPLACE PROCEDURE ADD_CUSTOMER
+  (
+  c_id  IN number,
+  c_fname  IN varchar2,
+  c_lname  IN varchar2,
+  c_mname  IN varchar2,
+  c_add1  IN varchar2,
+  c_add2  IN varchar2,
+  c_city  IN varchar2,
+  c_country  IN varchar2,
+  c_date_added  IN date,
+  c_region  IN varchar2,
+  total_count OUT number
+  )
+  AS
+  BEGIN
+    SELECT INTO CUSTOMER(customer_id, first_name, last_name, middle_name, address_lin1, address_line2, city, country, date_added, region)
+    VALUES(c_id, c_fname, c_lnmae, c_mname, c_add1, c_add2, c_city, c_country, c_date_added, c_region);
+    COMMIT;
+
+    dbms_output.put_line('Data successfully inserted');
+
+    SELECT COUNT(1) INTO total_count FROM customer;
+    
+  END ADD_CUSTOMER;
+  /
+
+  #Calling Procedure
+
+  DECLARE
+    tcount number(10);
+  BEGIN
+    ADD_CUSTOMER(14,'JEFF','AFONSO','A','23 SUWANNEE RD', NULL, 'ALPHARETTA', 'USA', SYSDATE,'SOUTH',tcount);
+    dbms_output.put_line('Total Records: ' || tcount);
+  END;
+
+# Procedure with IN OUT Mode
+
+CREATE OR REPLACE PROCEDURE ADD_CUSTOMER
+  (
+  c_id  IN OUT number,
+  c_fname  IN varchar2,
+  c_lname  IN varchar2,
+  c_mname  IN varchar2,
+  c_add1  IN varchar2,
+  c_add2  IN varchar2,
+  c_city  IN varchar2,
+  c_country  IN varchar2,
+  c_date_added  IN date,
+  c_region  IN varchar2,
+  )
+  AS
+  BEGIN
+    SELECT INTO CUSTOMER(customer_id, first_name, last_name, middle_name, address_lin1, address_line2, city, country, date_added, region)
+    VALUES(c_id, c_fname, c_lnmae, c_mname, c_add1, c_add2, c_city, c_country, c_date_added, c_region);
+    COMMIT;
+
+    dbms_output.put_line('Data successfully inserted');
+
+    SELECT COUNT(1) INTO C_ID FROM customer;
+    
+  END ADD_CUSTOMER;
+  /
+
+  #Calling Procedure
+
+  DECLARE
+    tcount number(10) := 45;
+  BEGIN
+    ADD_CUSTOMER(tcount,'JEFF','AFONSO','A','23 SUWANNEE RD', NULL, 'ALPHARETTA', 'USA', SYSDATE,'SOUTH');
+    dbms_output.put_line('Total Records: ' || tcount);
+  END;
+
+# Functions
+
+A stored function (also called a user function or user-defined function) is a set of PL/SQL statements you can call by name.
+Stored functions are very similar to procedures, except that a function returns a value to the environment in which it is called
+User functions can be used as part of a SQL expression
+
+CREATE [ OR REPLACE ] FUNCTION function_name
+(parameter1 MODE DATATYPE [ DEFAULT expression ],
+parameter2 MODE DATATYPE [ DEFAULT expression ],
+...)
+RETURN DATATYPE
+AS
+  [ variable1 DATATYPE,
+  variable2 DATATYPE; ... ]
+BEGIN
+  executable_statements
+  RETURN expression;
+[ EXCEPTION
+  WHEN
+    exception_name
+  THEN
+    executable_statements ]
+END;
+/
+
+# Function example
+
+CREATE OR REPLACE FUNCTION find_salescount
+(
+  p_sales_date IN date,
+) RETURN number
+AS
+  num_of_sales number := 0;
+BEGIN
+  SELECT COUNT(*) INTO num_of_sales FROM sales
+  WHERE sales_date = p_sales_date;
+
+  RETURN num_of_sales;
+
+END find_salescount;
+
+#Function calling
+
+select find_salescount(to_date('01-jan-2015','dd-mon-yyyy'));
+
+or
+
+DECLARE
+SCOUNT number := 0;
+BEGIN
+SCOUNT := find_salescount(to_date('01-jan-2015','dd-mon-yyyy'));
+dbms_output.put_line(SCOUNT);
+END;
+
+# Exceptions
+
+An error condition during a program execution is called an exception in PL/SQL.
+
+We can catch errors using EXCEPTION block in the program and an appropriate action is taken against the error condition.
+
+There are two types of exceptions:
+
+1) System-defined exceptions
+2) User-defined exceptions
+
+DECLARE
+  < declaration section >
+BEGIN
+  < executable section(s) >
+EXCEPTION
+  WHEN exception1 THEN
+    exception1-handling-statements
+  WHEN exception2 THEN
+    exception2-handling-statements
+  WHEN exception3 THEN
+    exception3-handling-statements
+  ........
+  WHEN others THEN
+    exception-handling-statements
+END;
+
+#What erros
+
+CREATE OR REPLACE PROCEDURE GET_CUSTOMER
+(
+c_id IN number
+)
+AS
+  c_name customer.first_name%type;
+  c_cntry customer.country%type;
+BEGIN
+  SELECT first_name, country INTO c_name, c_cntry
+  FROM customer
+  WHERE customer_id = c_id;
+
+  dbms_output.put_line('Name: ' || c_name);
+  dbms_output.put_line('Country: ' || c_cntry);
+END;
+/
+
+Number of rows matching where clause	        | runtime behaviour	                                    | value of sqlcode
+1	                                            | success: assigns column values to local variables	    | 0 (no error)
+0	                                            | Raises NO_DATA_FOUND exception	                      | 100
+More than 1	                                  | Raises TOO_MANY_ROWs exception	                      | -1422
+![image](https://github.com/Deepak2k20/PL-SQL/assets/65231118/94cd091f-0f23-4cba-b9c5-25f8adda58fe)
+
+
+
+
+
+
+
+
+
   
