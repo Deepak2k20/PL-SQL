@@ -161,3 +161,87 @@ BEGIN
   dbms_output.put_line('Data successfully inserted');
 END;
 /
+
+#Anonymous blocks
+
+All the blocks we have seen so far are "anonymous" - they have no names.
+
+If using anonymous blocks were the only way you could organize your statements, it would be very hard to use PL/SQL to build a large complex application.
+
+Instead, PL/SQL supports the definition of named blocks of code (Procedures and Functions)
+
+DECLARE
+  c_id number := 10;
+  c_name varchar2(50);
+  c_addr varchar2(50);
+BEGIN
+  SELECT first_name, country INTO c_name, c_addr
+  FROM customer
+  WHERE customer_id = c_id;
+
+  dbms_output.put_line('Name: ' || c_name);
+  dbms_output.put_line('Country: ' || c_addr);
+END;
+/
+
+#Procedures
+
+A procedure is a group of PL/SQL statements that you can call by name. It can accepts value as input, process the data and return output if required.
+
+CREATE [ OR REPLACE ] PROCEDURE procedure_name
+  (parameter1 MODE DATATYPE [ DEFAULT expression ],
+  parameter2 MODE DATATYPE [ DEFAULT expression ],
+  ...)
+AS
+  [ variable1 DATATYPE;
+  variable2 DATATYPE; ... ]
+BEGIN
+  executable_statements
+[EXCEPTION
+  WHEN
+    exception_name
+  THEN
+    executable_statements ]
+END;
+/
+
+MODE
+
+MODE is usually one of the following: IN, OUT, IN OUT.
+
+IN
+  Keyword usable as mODE that means read-only. The caller supplies the value of the parameter, and PL/SQl prevents you from changing it inside the program.
+
+  OUT
+    Keyword usable as MODE that means write-only. As you might expect, OUT mode means that the procedure sets the value of the parameter, and the calling program can read it.
+    (Any parameter value you attempt to supply when you call the program will be silently ignored.)
+
+  IN OUT
+    Keyword usable as MODE that means read or write. If you need to send a variable to a program that it can both read and update, and then have the updated value available to 
+    the calling program, use the parameter mode IN OUT.
+
+  #Creating a Procedure
+
+  CREATE OR REPLACE PROCEDURE ADD_CUSTOMER
+  (
+  c_id  IN number,
+  c_fname  IN varchar2,
+  c_lname  IN varchar2,
+  c_mname  IN varchar2,
+  c_add1  IN varchar2,
+  c_add2  IN varchar2,
+  c_city  IN varchar2,
+  c_country  IN varchar2,
+  c_date_added  IN date,
+  c_region  IN varchar2
+  )
+  AS
+  BEGIN
+    SELECT INTO CUSTOMER(customer_id, first_name, last_name, middle_name, address_lin1, address_line2, city, country, date_added, region)
+    VALUES(c_id, c_fname, c_lnmae, c_mname, c_add1, c_add2, c_city, c_country, c_date_added, c_region);
+    COMMIT;
+
+    dbms_output.put_line('Data successfully inserted');
+  END ADD_CUSTOMER;
+  /
+  
