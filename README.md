@@ -454,7 +454,69 @@ More than 1	                                  | Raises TOO_MANY_ROWs exception	 
 ![image](https://github.com/Deepak2k20/PL-SQL/assets/65231118/94cd091f-0f23-4cba-b9c5-25f8adda58fe)
 
 
+#Example
 
+Let us write some simple code to illustrate the concept. We will be using the CUSTOMERS table we had created and used in the previous chapters;
+
+CREATE OR REPLACE PROCEDURE GET_CUSTOMER
+(
+c_id  IN number
+)
+AS
+  c_name customer.first_name%type;
+  c_cntry customer.country%type;
+BEGIN
+  SELECT first_name, country INTO c_name, c_cntry
+  FROM customer
+  WHERE customer_id = c_id;
+
+  dbms_output.put_line('Name: ' || c_name);
+  dbms_output.put_line('Country: ' || c_cntry);
+EXCEPTION
+  WHEN no_data_found THEN
+    dbms_output.put_line('No such customer!');
+  WHEN too_many_rows THEN
+    dbms_output.put_line('You got more than 1 row!');
+  WHEN others THEN
+    dbms_output.put_line('Error!');
+END;
+/
+
+# User defined Exceptions
+
+PL/SQL allows you to define your own exceptions according to the need of your program. A user-defined exception must be declared and then raised explicitly, using either a RAISE
+
+CREATE OR REPLACE PROCEDURE GET_CUSTOMER
+(
+c_id  IN number
+)
+AS
+DECLARE
+  c_name customer.first_name%type;
+  c_cntry customer.country%type;
+  ex_customer_id EXCEPTION;
+BEGIN
+  IF c_id <= 0 THEN
+    RAISE ex_customer_id;
+  END IF;
+
+  SELECT first_name, country INTO c_name, c_addr
+  FROM customer
+  WHERE customer_id = c_id;
+
+  dbms_output.put_line('Name: " || c_name);
+  dbms_output.put_line('Country: ' || c_addr);
+EXCEPTION
+  WHEN ex_customer_id THEN
+    dbms_output.put_line('ID must be greater than zero!');
+  WHEN no_data_found THEN
+    dbms_output.put_line('No such customer!');
+  WHEN too_many_rows THEN
+    dbms_output.put_line(You got more than 1 row!');
+  WHEN others THEN
+    dbms_output.put_line('Error!');
+END;
+/
 
 
 
