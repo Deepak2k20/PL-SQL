@@ -1076,5 +1076,176 @@ END;
 
 execute process_customer(16);
 
+# Retrieving more than 1 row using Explicit Cursor
 
-  
+CREATE OR REPLACE PROCEDURE process_customer
+(
+c_id IN customer.customer_id%type;
+)
+IS
+  c_fname  customer.first_name%type;
+  c_lname  customer.last_name%type;
+  c_mname  customer.middle_name%type;
+  c_add1  customer.address_line1%type;
+  c_add2  customer.address_line%type;
+  c_city  customer.city%type;
+  c_country  customer.country%type;
+  c_date_added  customer.date_added%type;
+  c_region  customer.region%type;
+
+cursor c is SELECT first_name, last_name, middle_name, address_line1, address_line2, city, country, date_added, region
+FROM customer
+WHERE customer_id = c_id;  -- declaration of cursor
+
+BEGIN
+
+  open c; -- opening of cursor
+
+LOOP
+  fetch c
+  INTO c_fname, c_lname, c_mname, c_add1, c_add2, c_city, c_country, c_date_added, c_region; -- fetching of data
+EXIT WHEN C%NOTFOUND;
+  dbms_output.put_line('First Name: ' || c_fname);
+  dbms_output.put_line('Last Name: ' || c_lname);
+  dbms_output.put_line('Middle Name: ' || c_mname);
+  dbms_output.put_line('Address Line1: ' || c_add1);
+  dbms_output.put_line('Address Line2: ' || c_add2);
+  dbms_output.put_line('City: ' || c_city);
+  dbms_output.put_line('Country: ' || c_country);
+  dbms_output.put_line('Date Added: ' || c_date_added);
+  dbms_output.put_line('Region: ' || c_region);
+END LOOP:
+close c; -- closing of cursor
+
+END;
+
+execute process_customer(10);
+
+# Using Records in Cursors
+
+CREATE OR REPLACE PROCEDURE process_customer
+(
+c_id IN customer.customer_id%type;
+)
+IS
+
+cursor c is SELECT first_name, last_name, middle_name, address_line1, address_line2, city, country, date_added, region
+FROM customer
+WHERE customer_id = c_id;  -- declaration of cursor
+
+c_rec c%rowtype;
+
+BEGIN
+
+  open c; -- opening of cursor
+
+LOOP
+  fetch c
+  INTO c_rec; -- fetching of data
+EXIT WHEN C%NOTFOUND;
+  dbms_output.put_line('First Name: ' || c_rec.first_fname);
+  dbms_output.put_line('Last Name: ' || c_rec.last_lname);
+  dbms_output.put_line('Middle Name: ' || c_rec.middle_mname);
+
+END LOOP:
+close c; -- closing of cursor
+
+END;
+
+execute process_customer(16);
+
+# Cursor For Loop
+
+The cursor FOR loop is just an extension of the numberic FOR loop in PL/SQL. With a cursor FOR loop, the body of the loop is executed for each row returned by the query.
+
+#Advantages
+
+1) Oracle Database opens the cursor, declares a record by using %ROWTYPE against the cursor, fetches each row into a record, and then closes the loop when all the rows have been fetched
+2) Even though code loks as if you are fetching one row at a time, Oracle Database will actually fetch 100 rows at a time and enable you to work with each row individually.
+
+FOR customer_rec IN
+  (SELECT * FROM customer WHERE customer_id = 10)
+LOOP
+  dbms_output.put_line(customer_rec.last_name);
+END LOOP;
+
+
+#Example
+
+CREATE OR REPLACE PROCEDURE process_customer
+(
+c_id IN customer.customer_id%type;
+)
+IS
+BEGIN
+
+ FOR c_rec IN (SELECT first_name, last_name, middle_name, address_line1, address_line2, city, country, date_added, region
+ FROM customer
+ WHERE customer_id = c_id)
+
+LOOP
+  dbms_output.put_line('First Name: ' || c_rec.first_fname);
+  dbms_output.put_line('Last Name: ' || c_rec.last_lname);
+  dbms_output.put_line('Middle Name: ' || c_rec.middle_mname);
+END LOOP:
+
+END;
+
+execute process_customer(16);
+
+# Cursor Variable and Reference Cursor
+
+A cursor variable is a variable that points to a cursor or a result set. You can pass aa cursor variable as an argument to a procedure or a function.
+
+Pass a cursor variable back to the host environment that called the program unit - the result set can be "consumed" for display or other processing.
+
+c_variable SYS_REFCURSOR;
+
+#Example
+
+CREATE OR REPLACE FUNCTION get_names
+(
+custid IN number
+)
+RETURN SYS_REFCURSOR
+IS
+  l_return SYS_REFCURSOR;
+BEGIN
+  OPEN l_return FOR
+    SELECT first_name, last_name
+    FROm customer
+    WHERE customer_id = custid;
+RETURN l_return;
+
+END get_names;
+
+CREATE OR REPLACE PROCEDURE display_names
+IS
+c_rec SYS_REFCURSOR;
+FNAME varchar2(50);
+LNAME varcahr2(50);
+BEGIN
+c_rec := get_names(10);
+
+LOOP
+FETCH c_rec INTO FNAME, LNAME
+EXIT WHEN c_rec%NOTFOUND;
+dbms_output.put_line(FNAME);
+dbms_output.put_line(LNAME);
+END LOOP;
+
+CLOSE c_rec;
+
+END;
+
+EXECUTE display_names;
+
+# Exceptions for Cursors
+
+CURSOR_ALREADY_OPEN
+
+You get this exception when you try to open a cursor that is already open.
+
+INVALID_CURSOR
+
+You tried to reference a cursor that does not yet exist. This may have happened because you've executed a FETCH cursor or CLOSE cursor before opening the cursor.
