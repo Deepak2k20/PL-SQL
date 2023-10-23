@@ -1249,3 +1249,212 @@ You get this exception when you try to open a cursor that is already open.
 INVALID_CURSOR
 
 You tried to reference a cursor that does not yet exist. This may have happened because you've executed a FETCH cursor or CLOSE cursor before opening the cursor.
+
+# Collections
+
+We learnt about a composite datatype called RECORD, which is composed of one or more fields.
+
+1) In the same way Collection is another composite datatype
+2) An Oracle PL/SQL collection is a single-dimensional array
+3) It consists of one or more elements accessible through an index value
+4) All the elements have the same data type
+
+JOHN	TOM	JEFF	KIRAN	KHAN
+1	2	3	4	5
+![image](https://github.com/Deepak2k20/PL-SQL/assets/65231118/3d9a955c-87f5-40aa-97a7-43fc3fcdfde3)
+
+# Advantages
+
+Collections are used in some of the most important performance optimization features of PL/SQL, such as
+
+1) BULK COLLECT : SELECT statements that retrieve multiple rows with a single fetch, incraesing the speed of data retrievel
+
+2) FORALL: Inserts, updates, and deletes that use collections to change multiple rows of data very quickly
+
+3) Table functions: PL/SQL functions that return collections and can be called in the FROM clause of a SELECT statement
+
+You can also use collections to work with lists of data in your program that are not stored in database tables.
+
+# Collection Terminology
+
+Dense Collection				
+JOHN	TOM	JEFF	KIRAN	KHAN
+1	2	3	4	5
+![image](https://github.com/Deepak2k20/PL-SQL/assets/65231118/bb0d40d2-2088-4cbc-87c6-bbc9203195e8)
+
+Sparse Collection				
+JOHN	TOM			KHAN
+1	2	3	4	5
+![image](https://github.com/Deepak2k20/PL-SQL/assets/65231118/13b5d8b8-d162-457a-9f36-7773db1e33fe)
+
+#Index value
+
+The location of the data in a collection. Index values are usually integers but for one type of collection can also be strings.
+
+#Element
+
+The data stored at a specific index value in a collection. Elements in a collection are always of the same type (all of them are strings, dates, or records). PL/SQL collections are homogeneous.
+
+#Sparse
+
+A collection is sparse if there is at least one index value between the lowest and heighest defined index values that is not defined. For example, a sparse collection has an element assigned to index value 1 and another to index value 10 but nothing in between. The opposite of a sparse collection is a dense one.
+
+#Method
+
+A collection method is a procedure or function that either provides information about the collection or changes the contents of the collection. Methods are attached to the collection variable with dot notation(object-oriented syntax), as in my_collection.FIRST
+
+# Index by Tables (Associative Array)
+
+1) As the name implies, the collection is indexed using BINARY_INTEGER values or VARCHAR2 values, which do not need to be consecutive.
+2) We can not store this collection in a database
+3) They were originally called as Pl/SQL Tables
+4) You do not need to initialize a Associative Array collection
+
+DECLARE
+  TYPE customer_type IS TABLE OF varchar2(100) INDEX BY BINARY_INTEGER;
+    customer_table customer_type
+    v_idx number;
+BEGIN
+
+  customer_table(1) := 'MIKE';
+  customer_table(2) := 'JEFF';
+  customer_table(3) := 'JOHN';
+  customer_table(6) := 'KING';
+
+  -- Delete the third item of the collection
+customer_table.DELETE(3);
+
+-- Traverse sparse collection
+  v_idx := customer_table.FIRST;
+
+WHILE v_idx IS NOT NULL LOOP
+  dbms_output.put_line('Customer Name ' || customer_table(v_idx));
+  v_idx := customer_table.NEXT(v_idx);
+END LOOP display_loop;
+END;
+/
+
+# Nested Tables
+
+1) Nested table can be stored in a database
+2) Nested tables can be sparse but are almost always dense
+3) They can be indexed only by integer
+4) You can use the MULTISET operation to perform set operations and to perform equality comparisons on nested tables
+
+DECLARE
+  TYPE customer_type IS TABLE OF varchar2(100);
+  customer_table customer_type := customer_type();  -- Initialize the collection
+  v_idx number;
+BEGIN
+  customer_table.EXTEND(4); -- You have to extend before using the table
+
+  customer_table(1) := 'MIKE';
+  customer_table(2) := 'JEFF';
+  customer_table(3) := 'JOHN';
+--customer_table(6) := 'KING';  -- Throws an error
+  customer_table(4) := 'KING';  -- It must be sequential
+
+-- Delete the third item of the collection
+customer_table.DELETE(3);
+
+dbms_output.put_line('Customer Name ' || customer_table(customer_table.first));
+dbms_output.put_line('Customer Name ' || customer_table(customer_table.last));
+
+-- Traverse Dense collection
+v_idx := customer_table.FIRST;
+
+WHILE v_idx IS NOT NULL LOOP
+  dbms_output.put_line('Customer Name ' || customer_table(v_idx));
+  v_idx := customer_table.NEXT(v_idx);
+END LOOP display_loop;
+END;
+/
+
+# VARRAY
+
+1) A VARRAY is similar to a nested table except you must specify an upper bound in the declaration
+2) Like nested tables they can be stored in the database
+3) Unlike nested tables individual elements cannot be deleted so they remain dense
+
+DECLARE
+  TYPE customer_type IS VARRAY(4) OF VARCHAR2(100);
+  customer_table customer_type := customer_type();  -- Initialize the collection
+  v_idx number;
+
+BEGIN
+  customer_table.EXTEND(4);  -- You have to extend before using the table
+  customer_table(1) := 'MIKE';
+  customer_table(2) := 'JEFF';
+  customer_table(3) := 'JOHN';
+  customer_table(6) := 'KING';  -- Throws an error
+--customer_table(4) := 'KING';  -- It must be sequential
+
+-- Can not Delete an item
+-- customer_table.DELETE(3);
+
+-- Traverse Dense collection
+v_idx := customer_table.FIRST;
+
+WHILE v_idx IS NOT NULL LOOP
+  dbms_output.put_line('Customer Name ' || customer_table(v_idx));
+  v_idx := customer_table.NEXT(v_idx);
+END LOOP display_loop;
+END;
+/
+
+# Collection Methods
+
+1) EXISTS(n) - Returns TRUE if the specified element exists
+2) COUNT - Returns the number of elements in the collection
+3) LIMIT - Returns the maximum number of elements for a VARRAy, or NULL for nested tables
+4) FIRST - Returns the index of the first element in the collection
+5) LAST - Returns the index of the last element in the collection
+6) PRIOR(n) - Returns the index of the element prior to the specified element
+7) NEXT(n) - Returns the index of the next element after the specified element
+8) EXTEND - Appends a single null element to the collection
+9) EXTEND(n) - Appends n null elements to the collection
+10) EXTEND(n1, n2) - Appends n1 copies to the n2th element to the collection
+11) TRIM - Removes a single element from the end of the collection
+12) TRIM(n) - Removes a elements from the end of the collection
+13) DELETE - Removes all elements from the collection
+14) DELETE(n1, n2) - Removes all elements from n1 to n2 from the collection
+
+# Multiset Operators
+
+-- MULTISET UNION
+-- MULTISET UNION DISTINCT
+-- MULTISET EXCEPT
+-- MULTISET INTERSECT
+
+DECLARE
+  TYPE t_tab IS TABLE OF NUMBER;
+  l_tab1 t_tab := t_tab(1,2,3,4,5,6);
+  l_tab2 t_tab := t_tab(5,6,7,8,9,10);
+BEGIN
+  l_tab1 := l_tab1 MULTISET UNION l_tab2;
+
+FOR i IN l_tab1.first .. l_tab1.last LOOP
+  dbms_output.put_line(l_tab1(i));
+END LOOP;
+END;
+/
+
+# Collection Summary
+
+1) If the type statement conatins an INEX BY clause, the collection type is an associative array
+2) If the TYPE statement contains the VARRAY keyword, the collection type is a VARRAY
+3) IF the TYPE statement does not contain an INDEX BY clause or a VARRAy keyword, the collection type is a nested table
+4) Only the associative array offers a choice of indexing datatypes. Nested tables as well as VARRAYS are always indexed by integer
+5) When you define a VARRAy type, you specify the maximum number of elements that can be defined in a collection of that type
+
+#Conclusion
+
+1) You will rarely encounter a need for a VARRAY(How many times do you know in advance the maximum number of elements you will define in your collection?)
+2) The associative array is the most commonly used collection type
+3) But nested tables have some poweful, unique features (such as MULTISET operators) that can simplify the code you need to write to use your collection
+
+
+
+  
+
+
