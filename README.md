@@ -1453,8 +1453,25 @@ END;
 2) The associative array is the most commonly used collection type
 3) But nested tables have some poweful, unique features (such as MULTISET operators) that can simplify the code you need to write to use your collection
 
+# Triggers
 
+Triggers are stored programs, which are automatically executed or fired when some events occur. Triggers are, in fact, written to be executed in response to any of the following events:
 
+1) A datatype manipulation (DML) statement (DELETE, INSERT, or UPDATE)
+2) A database definition (DDL) statement (CREATE, ALTER, or DROP)
+3) A database operation (SERVERERROR, LOGON, LOGOFF, STARTUP, or SHUTDOWN)
+
+Triggers could be defined on the table, view, schema, or database with which the event is associated
+
+# Benefits of Triggers
+
+1) Generating some derived column values automatically
+2) Enforcing referential integrity
+3) Event logging and storing information on table access
+4) Auditing
+5) Synchronous replication of tables
+6) Imposing security authorizations
+7) Preventing invalid transactions
   
 
 
